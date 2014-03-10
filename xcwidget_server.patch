@@ -1,0 +1,59 @@
+--- include/func/func.core.php
++++ include/func/func.core.php
+@@ -2785,14 +2785,18 @@
+     }
+ }
+ 
+-function func_setcookie($name, $value = '', $ttl = 0, $httponly = true)
++function func_setcookie($name, $value = '', $ttl = 0, $httponly = true, $onparentdomain = false)
+ {
+     global $xcart_http_host, $xcart_https_host, $HTTPS, $xcart_web_dir;
+ 
+     $webdir = (empty($xcart_web_dir) ? '/' : $xcart_web_dir);
+ 
+-    func_setcookie_raw($name, $value, $ttl, $webdir, $xcart_http_host, false, $httponly);
+-
++    if ($onparentdomain == true) {
++        $new_cookie_domain = '.test.igennus.com'; //HACK!
++        func_setcookie_raw($name, $value, $ttl, $webdir, $new_cookie_domain, false, $httponly);
++    } else {
++        func_setcookie_raw($name, $value, $ttl, $webdir, $xcart_http_host, false, $httponly);
++    }
+     if ($xcart_http_host != $xcart_https_host)
+         func_setcookie_raw($name, $value, $ttl, $webdir, $xcart_https_host, $HTTPS, $httponly);
+
+--- include/sessions.php
++++ include/sessions.php
+@@ -390,7 +390,9 @@
+ 
+     $XCART_SESSION_EXPIRY = $expiry_time;
+     $XCARTSESSID = $sessid;
+-    func_setcookie($XCART_SESSION_NAME, $XCARTSESSID); 
++    func_setcookie($XCART_SESSION_NAME, $XCARTSESSID, 0, true, true);
++    //Replaced by line above - use new argument in func/func.core.php to make session available from parent domain.
++    //func_setcookie($XCART_SESSION_NAME, $XCARTSESSID); 
+ } // }}}
+ 
+ /**
+
+--- info.php
++++ info.php
+@@ -0,0 +1,18 @@
++<?php
++
++require './auth.php';
++
++//x_load(
++//    'cart',
++//    'product'
++//);
++
++x_session_register('cart');
++
++if ($cart) {
++    echo json_encode($cart);
++}
++return 0;
++
++?>
++
