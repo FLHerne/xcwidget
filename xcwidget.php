@@ -58,15 +58,19 @@ class XCWidget extends WP_Widget {
 
     extract($args);
     echo($before_widget);
-    echo($before_title . 'Cart contents' . $after_title);
+    echo($before_title . 'Cart contents' . $after_title . '<p>');
     if (!$xcart_get_error) {
-      echo('<p>' . $summary['total_items']);
-      echo($summary['total_items'] == 1 ? ' item' : ' items');
-      echo('<br>Total cost £'. $summary['total_cost'] . '</p>');
+      if ($summary['total_items'] == 0) {
+        echo('Cart is empty!');
+      } else {
+        echo($summary['total_items']);
+        echo($summary['total_items'] == 1 ? ' item' : ' items');
+        echo('<br>Total cost £'. $summary['total_cost']);
+      }
     } else {
-      echo('<p>' . $xcart_get_error . '</p>');
+      echo($xcart_get_error);
     }
-    echo($after_widget);
+    echo('</p>' . $after_widget);
   }
 
   //Validate URL from admin form
